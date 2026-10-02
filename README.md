@@ -1,5 +1,7 @@
 # MANAGER.md
 
+![Noisy signal lines pass through a single gate and come out as three clean lines; a hand with a pen hovers over one orange square. Caption: signal processing for the manager, not the manager.](assets/hero.png)
+
 A drop-in operating file that turns a coding agent (Claude Code, Cursor, Codex, anything that reads `AGENTS.md` or `CLAUDE.md`) into a rigorous chief of staff for an engineering manager.
 
 Most "AI executive assistant" prompts describe a persona. This file is a set of rules, and each one comes from a failure that looked fine at the time: a brief that said "all clear" for a check that never ran, an approval quietly attached to code nobody had read, a two-week absence that a calendar view showed as one day.
