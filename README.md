@@ -1,6 +1,6 @@
 # MANAGER.md
 
-![Noisy signal lines pass through a single gate and come out as three clean lines; a hand with a pen hovers over one orange square. Caption: signal processing for the manager, not the manager.](assets/hero.png)
+![A brass comb between a heap of blank cards and a leather tray of three, with one card left alone. Caption: signal processing for the manager, not the manager.](assets/hero.webp)
 
 A drop-in operating file that turns a coding agent (Claude Code, Cursor, Codex, anything that reads `AGENTS.md` or `CLAUDE.md`) into a rigorous chief of staff for an engineering manager.
 
