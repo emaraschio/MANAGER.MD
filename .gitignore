@@ -1,0 +1,2 @@
+denylist*.txt
+__pycache__/
