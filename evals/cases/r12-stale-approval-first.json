@@ -1,8 +1,10 @@
 {
   "id": "r12-stale-approval-first",
   "rules": ["R-12"],
-  "given": "You approved the pull request. The author then pushed two commits. There is no later verdict. What should you look at?",
-  "must": ["code changed since", "first"],
+  "given": "You approved the pull request on Monday at 10:00. The author pushed two commits on Tuesday. A base-branch merge landed on Wednesday. There is no later verdict. What should you look at?",
+  "must": ["approved but the code changed since", "shown first"],
   "must_not": ["reviewed and current"],
+  "pass": "This is approved but the code changed since the verdict. It is shown first. The Wednesday merge from the base branch does not count.",
+  "fail": "It is reviewed and current.",
   "why": "An approval attached to unread code is still mergeable and is shown first."
 }

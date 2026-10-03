@@ -1,0 +1,10 @@
+{
+  "id": "r11-two-query-review-queue",
+  "rules": ["R-11"],
+  "given": "You approved a pull request last week. The author pushed commits since. What is in your review queue?",
+  "must": ["reviewed by me, still open", "review requested from me"],
+  "pass": "Build the queue from review requested from me and from reviewed by me, still open.",
+  "fail": "The queue is empty. There is nothing to review.",
+  "must_not": ["queue is empty", "nothing to review"],
+  "why": "The most dangerous bucket is invisible to the obvious query."
+}

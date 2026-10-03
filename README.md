@@ -63,7 +63,7 @@ A "was" number is the rule before this revision. A "now" number is the current r
 - **Format:** the required sections exist, IDs are unique and sequential, every rule has a `*Why:*`, and the file stays small enough to be cheap as context.
 - **Dashes:** em dashes and en dashes are rejected in `MANAGER.md`, this README, and the eval cases.
 - **Live IDs:** every `G-n` or `R-n` cited in `MANAGER.md`, and in this README outside the revision map, must name a rule that exists.
-- **Eval schema:** each file in `evals/cases/` matches the case schema and cites live rule IDs. The schema check does not grade a reply.
+- **Eval schema:** each file in `evals/cases/` matches the case schema, cites live rule IDs, and the must and must-not phrases separate the case's own pass and fail replies. The schema check does not grade a model reply.
 - **Leak scan:** emails, phone numbers and common secret token shapes.
 
 The deny-list is a separate check. It stays on your machine, and public CI never receives it. Put your company's names (people, handles, internal repos) in a file outside the repo and run:
@@ -87,7 +87,7 @@ Tests: `python3 -m unittest discover -s tests`.
 
 ## Evals
 
-Cases in `evals/cases/` are a situation plus phrases a correct reply must contain and phrases a violation must not. CI checks that each file matches the schema and cites rules that exist. Nothing in this repo calls a model, so a green check is not behavioural coverage.
+Cases in `evals/cases/` are a situation, phrases a correct reply must contain, phrases a violation must not, and a pass reply and a fail reply written by hand. Phrases are two or more words. CI checks that those phrases agree with the two replies and would tell them apart. Nothing in this repo calls a model, so a green check is not behavioural coverage.
 
 ## Contributing
 

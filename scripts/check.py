@@ -29,7 +29,7 @@ RULE_RE = re.compile(r"^- \*\*([GR])-(\d+)\. ([^*]+?)\*\*(.*)$")
 RULE_LIKE_RE = re.compile(r"\*\*[GR]-\d+")
 ID_RE = re.compile(r"\b([GR]-\d+)\b")
 CASE_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-CASE_KEYS = {"id", "rules", "given", "must", "must_not", "why"}
+CASE_KEYS = {"id", "rules", "given", "must", "must_not", "pass", "fail", "why"}
 REVISION_HEADING = "## ID changes in this revision"
 DASHES = {"\u2014": "em dash", "\u2013": "en dash"}
 
@@ -137,6 +137,31 @@ def _string_list(value):
     return isinstance(value, list) and value and all(isinstance(item, str) and item.strip() for item in value)
 
 
+def _norm(text):
+    return " ".join(text.lower().split())
+
+
+def coherence_errors(rel, data):
+    """Phrases must separate the hand-written pass reply from the fail reply."""
+    errors = []
+    pass_n = _norm(data["pass"])
+    fail_n = _norm(data["fail"])
+    for key, reply_n, other_n, missing, leaked in (
+        ("must", pass_n, fail_n, "must phrase not in pass", "must phrase appears in fail"),
+        ("must_not", fail_n, pass_n, "must_not phrase not in fail", "must_not phrase appears in pass"),
+    ):
+        for phrase in data[key]:
+            norm = _norm(phrase)
+            if len(norm.split()) < 2:
+                errors.append(f"{rel}: phrase too short: {phrase}")
+                continue
+            if norm not in reply_n:
+                errors.append(f"{rel}: {missing}: {phrase}")
+            if norm in other_n:
+                errors.append(f"{rel}: {leaked}: {phrase}")
+    return errors
+
+
 def check_cases(root, defined):
     """Return (errors, count) for evals/cases/*.json. Missing dir is zero cases, not a failure."""
     case_dir = os.path.join(root, "evals", "cases")
@@ -166,31 +191,34 @@ def check_cases(root, defined):
         if not isinstance(data, dict):
             errors.append(f"{rel}: expected an object")
             continue
+        schema_errors = []
         for key in sorted(CASE_KEYS - set(data)):
-            errors.append(f"{rel}: missing {key}")
+            schema_errors.append(f"{rel}: missing {key}")
         for key in sorted(set(data) - CASE_KEYS):
-            errors.append(f"{rel}: unexpected key {key}")
+            schema_errors.append(f"{rel}: unexpected key {key}")
         case_id = data.get("id")
         if not isinstance(case_id, str) or not CASE_ID_RE.match(case_id or ""):
-            errors.append(f"{rel}: id must be lowercase hyphenated words")
+            schema_errors.append(f"{rel}: id must be lowercase hyphenated words")
         elif name != case_id + ".json":
-            errors.append(f"{rel}: filename does not match id")
+            schema_errors.append(f"{rel}: filename does not match id")
         rules = data.get("rules")
         if not isinstance(rules, list) or not rules:
-            errors.append(f"{rel}: rules must be a non-empty list")
+            schema_errors.append(f"{rel}: rules must be a non-empty list")
         else:
             for rule in rules:
                 if not isinstance(rule, str) or not ID_RE.fullmatch(rule):
-                    errors.append(f"{rel}: bad rule token")
+                    schema_errors.append(f"{rel}: bad rule token")
                 elif rule not in defined:
-                    errors.append(f"{rel}: {rule} is not a rule")
-        if not isinstance(data.get("given"), str) or not str(data.get("given", "")).strip():
-            errors.append(f"{rel}: given must be a non-empty string")
-        if not isinstance(data.get("why"), str) or not str(data.get("why", "")).strip():
-            errors.append(f"{rel}: why must be a non-empty string")
+                    schema_errors.append(f"{rel}: {rule} is not a rule")
+        for key in ("given", "why", "pass", "fail"):
+            if key in data and (not isinstance(data.get(key), str) or not str(data.get(key)).strip()):
+                schema_errors.append(f"{rel}: {key} must be a non-empty string")
         for key in ("must", "must_not"):
             if key in data and not _string_list(data.get(key)):
-                errors.append(f"{rel}: {key} must be a non-empty list of strings")
+                schema_errors.append(f"{rel}: {key} must be a non-empty list of strings")
+        errors.extend(schema_errors)
+        if not schema_errors:
+            errors.extend(coherence_errors(rel, data))
     return errors, count
 
 

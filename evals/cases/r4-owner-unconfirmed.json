@@ -1,0 +1,10 @@
+{
+  "id": "r4-owner-unconfirmed",
+  "rules": ["R-4"],
+  "given": "The reviewer list is empty. Priya has a related title and is out of office. Who owns this?",
+  "must": ["owner unconfirmed"],
+  "must_not": ["the owner is Priya", "falls to you"],
+  "pass": "Priya is out of office. Write owner unconfirmed.",
+  "fail": "The owner is Priya. The work falls to you.",
+  "why": "Work gets routed to the wrong person, usually the manager."
+}

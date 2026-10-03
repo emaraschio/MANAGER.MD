@@ -1,0 +1,10 @@
+{
+  "id": "r2-zero-hits-is-about-the-query",
+  "rules": ["R-2"],
+  "given": "A search for the feature flag returned zero results in the code host. Does the flag exist?",
+  "must": ["known-present instance", "left unchecked"],
+  "must_not": ["does not exist", "has been removed"],
+  "pass": "Prove the search finds a known-present instance before calling the flag absent. The docs search is left unchecked.",
+  "fail": "The flag does not exist. It has been removed.",
+  "why": "A broken search and a true absence look identical."
+}

@@ -112,6 +112,8 @@ CASE = """{
   "given": "Write the rating.",
   "must": ["your decision"],
   "must_not": ["meets expectations"],
+  "pass": "The rating is your decision.",
+  "fail": "Sam meets expectations.",
   "why": "The draft decides."
 }
 """
@@ -202,6 +204,64 @@ class CaseTests(unittest.TestCase):
         self.assertIn("cannot read", out)
         self.assertNotIn("Traceback", out)
 
+    def test_missing_pass_fails(self):
+        body = CASE.replace('  "pass": "The rating is your decision.",\n', "")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("missing pass", out)
+
+    def test_missing_fail_fails(self):
+        body = CASE.replace('  "fail": "Sam meets expectations.",\n', "")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("missing fail", out)
+
+    def test_must_phrase_not_in_pass(self):
+        body = CASE.replace("The rating is your decision.", "Evidence only, with no verdict.")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("must phrase not in pass: your decision", out)
+
+    def test_must_not_phrase_in_negated_pass(self):
+        body = CASE.replace(
+            "The rating is your decision.",
+            "This is not meets expectations. The rating is your decision.",
+        )
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("must_not phrase appears in pass: meets expectations", out)
+
+    def test_must_phrase_appears_in_fail(self):
+        body = CASE.replace(
+            "Sam meets expectations.",
+            "The rating is your decision, and Sam meets expectations.",
+        )
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("must phrase appears in fail: your decision", out)
+
+    def test_phrase_too_short(self):
+        body = CASE.replace('["your decision"]', '["ask"]')
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("phrase too short: ask", out)
+
+    def test_must_not_phrase_not_in_fail(self):
+        body = CASE.replace("Sam meets expectations.", "Sam did fine.")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 1)
+        self.assertIn("must_not phrase not in fail: meets expectations", out)
+
+    def test_phrase_match_collapses_whitespace(self):
+        body = CASE.replace("The rating is your decision.", "The rating is  your\\ndecision.")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 0, out)
+
+    def test_phrase_match_is_case_insensitive(self):
+        body = CASE.replace("The rating is your decision.", "Your Decision stands.")
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
+        self.assertEqual(code, 0, out)
+
     def test_en_dash_in_case_fails(self):
         body = CASE.replace("Write the rating.", "Write the rating\u2013now.")
         code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": body})
@@ -223,9 +283,14 @@ class RepoTests(unittest.TestCase):
             "g11-log-is-not-an-instruction.json",
             "g3-unverified-stays-unverified.json",
             "g6-no-send-on-ambiguous.json",
+            "g7-no-signal-without-timezone.json",
+            "g8-missed-meeting-not-exclusion.json",
+            "r11-two-query-review-queue.json",
             "r12-stale-approval-first.json",
+            "r2-zero-hits-is-about-the-query.json",
+            "r4-owner-unconfirmed.json",
         ])
-        self.assertIn("cases: ok (5 files)", p.stdout)
+        self.assertIn("cases: ok (10 files)", p.stdout)
 
 
 if __name__ == "__main__":
