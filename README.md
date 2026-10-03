@@ -21,8 +21,8 @@ The framing comes from Camille Fournier's [*The Manager's Path in the Age of AI*
 ## How it is organised
 
 - **Stance:** what the agent is for, and what it is not.
-- **Guardrails (`G-n`):** hard limits, such as never drafting the people decision and never reporting an unverified check as clear.
-- **Operating rules (`R-n`):** defaults for verification, the review queue, calendars, meeting prep, decisions, notes and agent execution. Each is one line with a `*Why:*`.
+- **Guardrails (`G-n`):** hard limits, such as never drafting the people decision and never reporting an unverified check as clear. G-1 and G-2 hold against an explicit instruction. Any other guardrail yields only to a case-specific instruction in the conversation, and an operating rule yields to the host agent file.
+- **Operating rules (`R-n`):** defaults for verification, the review queue, calendars, meeting prep, decisions, notes and agent execution. Each rule line has a `*Why:*`. R-23 adds its branches under that line.
 - **Your context:** the only part you are meant to edit.
 - **Output:** a decision-first summary, about ten bullets at most, then a short narrative. Tables come after both. A short reply skips the structure.
 
@@ -40,13 +40,30 @@ The approval is still mergeable. The author re-requests and merges.
 | Absence span | unverified |
 ```
 
-Rule IDs are stable, so you can tune a rule with something like `R-12: stalled after three days, not five` without editing the rule.
+Rule IDs are stable from this revision on. The map below is the one break. Tune a rule with something like `R-12: stalled after three days, not five` without editing the rule.
+
+## ID changes in this revision
+
+Delete an override for a removed rule before you retarget the ones that moved.
+
+- Removed: R-21 (push toward the human). The behaviour stays in the Stance paragraph of `MANAGER.md`. Delete any override of R-21.
+- R-22 (relational messages) is now R-21.
+- R-22 is new: resolve a speaker by attendees and topic.
+- R-23 and R-24 keep their numbers. The text of R-23 is rewritten.
+- R-25 is new: change the answer for a fact, not for pushback.
+- R-25 through R-31 are now R-26 through R-32.
+- Removed: R-32 and R-33. Their checks now live in the corrections rule.
+- R-34 is now R-33.
+- Added: G-11. G-1 through G-10 keep their numbers. The text of G-2 grew.
 
 ## Checks
 
 `scripts/check.py` (Python standard library only) runs in CI on every push and every pull request:
 
 - **Format:** the required sections exist, IDs are unique and sequential, every rule has a `*Why:*`, and the file stays small enough to be cheap as context.
+- **Dashes:** em dashes and en dashes are rejected in `MANAGER.md`, this README, and the eval cases.
+- **Live IDs:** every `G-n` or `R-n` cited in `MANAGER.md`, and in this README outside the revision map, must name a rule that exists.
+- **Eval schema:** each file in `evals/cases/` matches the case schema and cites live rule IDs. The schema check does not grade a reply.
 - **Leak scan:** emails, phone numbers and common secret token shapes.
 
 The deny-list is a separate check. It stays on your machine, and public CI never receives it. Put your company's names (people, handles, internal repos) in a file outside the repo and run:
@@ -68,9 +85,13 @@ Then `chmod +x .git/hooks/pre-commit .git/hooks/pre-push`.
 
 Tests: `python3 -m unittest discover -s tests`.
 
+## Evals
+
+Cases in `evals/cases/` are a situation plus phrases a correct reply must contain and phrases a violation must not. CI checks that each file matches the schema and cites rules that exist. Nothing in this repo calls a model, so a green check is not behavioural coverage.
+
 ## Contributing
 
-A good rule is one line, states the behaviour, and has a `*Why:*` naming the failure it prevents. It should still be true at a company you have never worked at. Leave out the incident that taught it to you, or describe it with no identifying detail. Names of people, companies and internal repos belong in **Your context** and in the local deny-list. The checker caps `MANAGER.md` at 300 lines and 4000 words.
+A good rule states the behaviour on one line and has a `*Why:*` naming the failure it prevents. A short list under that line is fine when the rule is a set of branches, as R-23 is. It should still be true at a company you have never worked at. Leave out the incident that taught it to you, or describe it with no identifying detail. Names of people, companies and internal repos belong in **Your context** and in the local deny-list. The checker caps `MANAGER.md` at 300 lines and 4000 words.
 
 ## License
 

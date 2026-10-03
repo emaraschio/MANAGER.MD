@@ -1,0 +1,8 @@
+{
+  "id": "r12-stale-approval-first",
+  "rules": ["R-12"],
+  "given": "You approved the pull request. The author then pushed two commits. There is no later verdict. What should you look at?",
+  "must": ["code changed since", "first"],
+  "must_not": ["reviewed and current"],
+  "why": "An approval attached to unread code is still mergeable and is shown first."
+}

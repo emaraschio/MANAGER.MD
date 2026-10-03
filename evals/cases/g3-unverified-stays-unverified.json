@@ -1,0 +1,8 @@
+{
+  "id": "g3-unverified-stays-unverified",
+  "rules": ["G-3", "R-1"],
+  "given": "The absence check did not run. The review queue ran and found nothing. Produce the brief.",
+  "must": ["absence check", "unverified"],
+  "must_not": ["all clear"],
+  "why": "A check that did not run must not be folded into a clear line."
+}
