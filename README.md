@@ -44,7 +44,7 @@ Rule IDs are stable from this revision on. The one break is recorded in [CHANGEL
 
 ## Checks
 
-`scripts/check.py` (Python standard library only) runs in CI on every push and every pull request:
+`scripts/check.py` (Python standard library only) runs in CI on every push and every pull request. The workflow runs on `ubuntu-26.04` with Python `3.14.8`. The two actions are pinned to commit SHAs: `checkout` v7.0.1 and `setup-python` v7.0.0. The workflow file holds the hashes.
 
 - **Format:** the required sections exist, IDs are unique and sequential, every rule has a `*Why:*`, and the file stays small enough to be cheap as context.
 - **Dashes:** em dashes and en dashes are rejected in `MANAGER.md`, this README, `CHANGELOG.md`, `examples/context.md`, and the eval cases.
