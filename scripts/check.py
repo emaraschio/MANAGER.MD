@@ -99,6 +99,17 @@ def defined_ids(text):
     return found
 
 
+def rel_label(root, path):
+    """Path to print. Falls back to the given path when it sits outside root."""
+    try:
+        rel = os.path.relpath(path, root)
+    except ValueError:
+        return path
+    if rel == ".." or rel.startswith(".." + os.sep):
+        return path
+    return rel
+
+
 def find_dashes(rel, lines):
     hits = []
     for n, line in enumerate(lines, 1):
@@ -140,8 +151,12 @@ def check_cases(root, defined):
             errors.append(f"{rel}: expected a json file")
             continue
         count += 1
-        with open(path, encoding="utf-8") as f:
-            raw = f.read()
+        try:
+            with open(path, encoding="utf-8") as f:
+                raw = f.read()
+        except (UnicodeDecodeError, OSError) as e:
+            errors.append(f"{rel}: cannot read ({e.__class__.__name__})")
+            continue
         errors.extend(find_dashes(rel, raw.splitlines()))
         try:
             data = json.loads(raw)
@@ -236,8 +251,9 @@ def main(argv=None):
     defined = defined_ids(manager_text)
     manager_lines = manager_text.splitlines()
 
-    dash_hits = find_dashes("MANAGER.md", manager_lines)
-    id_hits = find_bad_ids("MANAGER.md", manager_lines, defined)
+    manager_label = rel_label(args.root, manager)
+    dash_hits = find_dashes(manager_label, manager_lines)
+    id_hits = find_bad_ids(manager_label, manager_lines, defined)
     readme = os.path.join(args.root, "README.md")
     if os.path.isfile(readme):
         with open(readme, encoding="utf-8") as f:

@@ -34,7 +34,8 @@ def run(manager_text, *args, extra_files=None):
         for name, body in (extra_files or {}).items():
             path = os.path.join(root, name)
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w") as f:
+            mode = "w" if isinstance(body, str) else "wb"
+            with open(path, mode) as f:
                 f.write(body)
         resolved = [a.replace("{root}", root) for a in args]
         env = {k: v for k, v in os.environ.items() if k != "MANAGER_MD_DENYLIST"}
@@ -189,6 +190,17 @@ class CaseTests(unittest.TestCase):
         code, out = run(GOOD, extra_files={"evals/cases/wrong-name.json": CASE})
         self.assertEqual(code, 1)
         self.assertIn("filename does not match id", out)
+
+    def test_invalid_json_fails(self):
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": "{"})
+        self.assertEqual(code, 1)
+        self.assertIn("invalid json", out)
+
+    def test_non_utf8_case_is_a_finding(self):
+        code, out = run(GOOD, extra_files={"evals/cases/g1-ok.json": b"\xff"})
+        self.assertEqual(code, 1)
+        self.assertIn("cannot read", out)
+        self.assertNotIn("Traceback", out)
 
     def test_en_dash_in_case_fails(self):
         body = CASE.replace("Write the rating.", "Write the rating\u2013now.")
