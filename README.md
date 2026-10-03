@@ -16,7 +16,7 @@ The framing comes from Camille Fournier's [*The Manager's Path in the Age of AI*
 
 1. Copy [`MANAGER.md`](MANAGER.md) into the repo or folder where you run your agent.
 2. Reference it from your agent file, for example add `Read and follow MANAGER.md.` to `CLAUDE.md` or `AGENTS.md`.
-3. Fill in the **Your context** block: team, sources, frameworks, and any rule overrides by ID.
+3. Fill in the **Your context** block: team, sources, frameworks, and any rule overrides by ID. [examples/context.md](examples/context.md) is a filled fictional copy. The published `MANAGER.md` stays blank.
 
 ## How it is organised
 
@@ -40,29 +40,15 @@ The approval is still mergeable. The author re-requests and merges.
 | Absence span | unverified |
 ```
 
-Rule IDs are stable from this revision on. The map below is the one break. Tune a rule with something like `R-12: stalled after three days, not five` without editing the rule.
-
-## ID changes in this revision
-
-A "was" number is the rule before this revision. A "now" number is the current rule. Delete an override for a removed rule before you retarget the ones that moved.
-
-- Was R-21 (push toward the human): removed. The behaviour stays in the Stance paragraph of `MANAGER.md`. Delete any override of that rule.
-- Was R-22 (relational messages): now R-21.
-- Now R-22 (resolve a speaker by attendees and topic). This number used to mean relational messages.
-- R-23 and R-24 keep their numbers. The text of R-23 is rewritten.
-- Now R-25 (change the answer for a fact, not for pushback). This number used to mean after two failed raises.
-- Were R-25 through R-31: now R-26 through R-32.
-- Were R-32 (judge on exit codes) and R-33 (match whole words): removed. Those checks are part of the corrections rule.
-- Was R-34 (turn corrections into checks): now R-33.
-- Added: G-11. G-1 through G-10 keep their numbers. The text of G-2 grew.
+Rule IDs are stable from this revision on. The one break is recorded in [CHANGELOG.md](CHANGELOG.md). Tune a rule with something like `R-12: stalled after three days, not five` without editing the rule.
 
 ## Checks
 
 `scripts/check.py` (Python standard library only) runs in CI on every push and every pull request:
 
 - **Format:** the required sections exist, IDs are unique and sequential, every rule has a `*Why:*`, and the file stays small enough to be cheap as context.
-- **Dashes:** em dashes and en dashes are rejected in `MANAGER.md`, this README, and the eval cases.
-- **Live IDs:** every `G-n` or `R-n` cited in `MANAGER.md`, and in this README outside the revision map, must name a rule that exists.
+- **Dashes:** em dashes and en dashes are rejected in `MANAGER.md`, this README, `CHANGELOG.md`, `examples/context.md`, and the eval cases.
+- **Live IDs:** every `G-n` or `R-n` cited in `MANAGER.md`, this README, and `examples/context.md` must name a rule that exists. The changelog is history and may name removed rules.
 - **Eval schema:** each file in `evals/cases/` matches the case schema, cites live rule IDs, and the must and must-not phrases separate the case's own pass and fail replies. The schema check does not grade a model reply.
 - **Leak scan:** emails, phone numbers and common secret token shapes.
 

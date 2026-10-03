@@ -1,0 +1,10 @@
+{
+  "id": "r12-verdict-states",
+  "rules": ["R-12"],
+  "given": "Your context lists review states APPROVED and CHANGES_REQUESTED. The latest review on the pull request is COMMENTED. There is no APPROVED or CHANGES_REQUESTED review.",
+  "must": ["not a verdict state"],
+  "must_not": ["baseline is the comment"],
+  "pass": "COMMENTED is not a verdict state. The listed states are APPROVED and CHANGES_REQUESTED.",
+  "fail": "The baseline is the comment.",
+  "why": "A comment is not a verdict, and a later comment hides an earlier one."
+}

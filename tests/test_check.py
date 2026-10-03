@@ -139,10 +139,27 @@ class DashAndIdTests(unittest.TestCase):
         code, out = run(GOOD.replace("Summary first.", "See R-1."))
         self.assertEqual(code, 0, out)
 
-    def test_retired_id_inside_revision_map_passes(self):
+    def test_retired_id_under_old_heading_fails(self):
         readme = "# Readme\n\n## Use it\n\nSee R-1.\n\n## ID changes in this revision\n\nRemoved R-99.\n\n## Checks\n\nStill R-1.\n"
         code, out = run(GOOD, extra_files={"README.md": readme})
+        self.assertEqual(code, 1)
+        self.assertIn("R-99 is not a rule", out)
+
+    def test_changelog_may_name_removed_rules(self):
+        code, out = run(GOOD, extra_files={"CHANGELOG.md": "# Changelog\n\nWas R-34.\n"})
         self.assertEqual(code, 0, out)
+
+    def test_dead_id_in_example_fails(self):
+        code, out = run(GOOD, extra_files={"examples/context.md": "See R-99.\n"})
+        self.assertEqual(code, 1)
+        self.assertIn("examples/context.md", out)
+        self.assertIn("R-99 is not a rule", out)
+
+    def test_em_dash_in_changelog_fails(self):
+        code, out = run(GOOD, extra_files={"CHANGELOG.md": "# Changelog\n\nAn em\u2014dash.\n"})
+        self.assertEqual(code, 1)
+        self.assertIn("CHANGELOG.md", out)
+        self.assertIn("em dash", out)
 
     def test_retired_id_outside_revision_map_fails(self):
         readme = "# Readme\n\n## Use it\n\nSee R-99.\n\n## ID changes in this revision\n\nRemoved R-99.\n"
@@ -286,11 +303,27 @@ class RepoTests(unittest.TestCase):
             "g7-no-signal-without-timezone.json",
             "g8-missed-meeting-not-exclusion.json",
             "r11-two-query-review-queue.json",
+            "r12-blank-verdict-states.json",
             "r12-stale-approval-first.json",
+            "r12-verdict-states.json",
+            "r15-absence-span.json",
             "r2-zero-hits-is-about-the-query.json",
             "r4-owner-unconfirmed.json",
         ])
-        self.assertIn("cases: ok (10 files)", p.stdout)
+        self.assertIn("cases: ok (13 files)", p.stdout)
+        with open(os.path.join(root, "examples", "context.md"), encoding="utf-8") as f:
+            example = f.read()
+        with open(os.path.join(root, "MANAGER.md"), encoding="utf-8") as f:
+            manager = f.read()
+        self.assertIn("Fictivia", example)
+        self.assertNotIn("Fictivia", manager)
+        context = manager.split("## Your context", 1)[1].split("## Output", 1)[0]
+        bullets = [line for line in context.splitlines() if line.startswith("- ")]
+        self.assertTrue(bullets)
+        for line in bullets:
+            self.assertTrue(line.rstrip().endswith(":"), line)
+        with open(os.path.join(root, "CHANGELOG.md"), encoding="utf-8") as f:
+            self.assertIn("R-34", f.read())
 
 
 if __name__ == "__main__":

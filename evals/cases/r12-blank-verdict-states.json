@@ -1,0 +1,10 @@
+{
+  "id": "r12-blank-verdict-states",
+  "rules": ["R-12"],
+  "given": "The review-states field in Your context is blank. The latest review is a comment. An approve review is older.",
+  "must": ["approve and request-changes"],
+  "must_not": ["baseline is the comment"],
+  "pass": "The field is blank, so the states are approve and request-changes. A comment is not the baseline.",
+  "fail": "The baseline is the comment.",
+  "why": "A blank field still has a verdict, and a comment is not one."
+}

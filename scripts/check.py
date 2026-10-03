@@ -30,7 +30,6 @@ RULE_LIKE_RE = re.compile(r"\*\*[GR]-\d+")
 ID_RE = re.compile(r"\b([GR]-\d+)\b")
 CASE_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 CASE_KEYS = {"id", "rules", "given", "must", "must_not", "pass", "fail", "why"}
-REVISION_HEADING = "## ID changes in this revision"
 DASHES = {"\u2014": "em dash", "\u2013": "en dash"}
 
 # Shapes ported from a private redactor. Dates are deliberately absent: they
@@ -119,14 +118,9 @@ def find_dashes(rel, lines):
     return hits
 
 
-def find_bad_ids(rel, lines, defined, skip_revision=False):
+def find_bad_ids(rel, lines, defined):
     hits = []
-    skipping = False
     for n, line in enumerate(lines, 1):
-        if skip_revision and line.startswith("## "):
-            skipping = line.strip() == REVISION_HEADING
-        if skipping:
-            continue
         for token in ID_RE.findall(line):
             if token not in defined:
                 hits.append(f"{rel}:{n}: {token} is not a rule")
@@ -287,7 +281,17 @@ def main(argv=None):
         with open(readme, encoding="utf-8") as f:
             readme_lines = f.read().splitlines()
         dash_hits.extend(find_dashes("README.md", readme_lines))
-        id_hits.extend(find_bad_ids("README.md", readme_lines, defined, skip_revision=True))
+        id_hits.extend(find_bad_ids("README.md", readme_lines, defined))
+    changelog = os.path.join(args.root, "CHANGELOG.md")
+    if os.path.isfile(changelog):
+        with open(changelog, encoding="utf-8") as f:
+            dash_hits.extend(find_dashes("CHANGELOG.md", f.read().splitlines()))
+    example = os.path.join(args.root, "examples", "context.md")
+    if os.path.isfile(example):
+        with open(example, encoding="utf-8") as f:
+            example_lines = f.read().splitlines()
+        dash_hits.extend(find_dashes("examples/context.md", example_lines))
+        id_hits.extend(find_bad_ids("examples/context.md", example_lines, defined))
     for hit in dash_hits:
         print(f"dash: {hit}")
     findings += len(dash_hits)

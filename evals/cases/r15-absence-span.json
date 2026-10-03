@@ -1,0 +1,10 @@
+{
+  "id": "r15-absence-span",
+  "rules": ["R-15"],
+  "given": "The team is Sam and Priya. Minimum staffing is 2. Priya is out Monday through the Friday after next. The agenda shows only Monday. The manager is out Wednesday and Thursday.",
+  "must": ["full span", "drops below the minimum", "coverage consequence"],
+  "must_not": ["only Monday", "team is covered"],
+  "pass": "Priya is out for the full span, Monday through the Friday after next. One person remains, so the team drops below the minimum of 2. Your Wednesday and Thursday absence has a coverage consequence.",
+  "fail": "Priya is out only Monday. The team is covered.",
+  "why": "A two-week absence rendered as one day invalidates every plan built on it."
+}
